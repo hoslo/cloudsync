@@ -20,25 +20,26 @@ class FileView extends StatelessWidget {
     return SafeArea(
         child: Scaffold(
             floatingActionButton: CupertinoButton(
-                child: const Text("Refresh"),
-                onPressed: () {
-                  controller.clearCache();
-                  Get.delete<FileController>();
-                  Navigator.of(context).pushAndRemoveUntil(
-                      CupertinoPageRoute(builder: (context) {
-                    return const FileView(
-                      path: "/",
-                    );
-                  }), (Route<dynamic> route) => false);
-                  // String? outputFile = await FilePicker.platform.saveFile(
-                  //   dialogTitle: 'Please select an output file:',
-                  //   fileName: 'output-file.pdf',
-                  // );
+                child: const Text("save"),
+                onPressed: () async {
+                  // controller.clearCache();
+                  // Get.delete<FileController>();
+                  // Navigator.of(context).pushAndRemoveUntil(
+                  //     CupertinoPageRoute(builder: (context) {
+                  //   return const FileView(
+                  //     path: "/",
+                  //   );
+                  // }), (Route<dynamic> route) => false);
+                  String? outputFile = await FilePicker.platform.saveFile(
+                    dialogTitle: 'Please select an output file:',
+                    fileName: 'output-file.pdf',
+                  );
 
-                  // if (outputFile == null) {
-                  //   // User canceled the picker
-                  // }
-                  // return;
+                  if (outputFile == null) {
+                    // User canceled the picker
+                  }
+                  print('output file $outputFile');
+                  return;
                 }),
             body: controller.obx(
               (state) {

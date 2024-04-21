@@ -40,45 +40,56 @@ class Setting extends StatelessWidget {
     }
 
     final settings = {
-      "S3": S3Setting(goToCloud: goToCloud,),
-      "R2": R2Setting(goToCloud: goToCloud,),
+      "S3": S3Setting(
+        goToCloud: goToCloud,
+      ),
+      "R2": R2Setting(
+        goToCloud: goToCloud,
+      ),
     };
     print('3333 ${controller.selectIndex.value}');
 
     return SafeArea(
       child: CupertinoPageScaffold(
+          resizeToAvoidBottomInset: false,
           child: Center(
-        child: Column(
-          children: [
-            Center(
-              child: CupertinoButton(
-                  onPressed: () => _showDialog(
-                        CupertinoPicker(
-                          magnification: 1.22,
-                          squeeze: 1.2,
-                          useMagnifier: true,
-                          itemExtent: 32.0,
-                          // This sets the initial item.
-                          scrollController: FixedExtentScrollController(
-                            initialItem: controller.selectIndex.value,
+            child: Column(
+              children: [
+                Center(
+                  child: CupertinoButton(
+                      onPressed: () => _showDialog(
+                            CupertinoPicker(
+                              magnification: 1.22,
+                              squeeze: 1.2,
+                              useMagnifier: true,
+                              itemExtent: 32.0,
+                              // This sets the initial item.
+                              scrollController: FixedExtentScrollController(
+                                initialItem: controller.selectIndex.value,
+                              ),
+                              // This is called when selected item is changed.
+                              onSelectedItemChanged: (int selectedItem) {
+                                controller.selectIndex.value = selectedItem;
+                              },
+                              children: List<Widget>.generate(
+                                  settings.keys.length, (int index) {
+                                return Center(
+                                    child: Text(settings.keys.toList()[index]));
+                              }),
+                            ),
                           ),
-                          // This is called when selected item is changed.
-                          onSelectedItemChanged: (int selectedItem) {
-                            controller.selectIndex.value = selectedItem;
-                          },
-                          children: List<Widget>.generate(settings.keys.length,
-                              (int index) {
-                            return Center(child: Text(settings.keys.toList()[index]));
-                          }),
-                        ),
-                      ),
-                  child: Obx(
-                      () => Text(settings.keys.toList()[controller.selectIndex.value]))),
+                      child: Obx(() => Text(settings.keys
+                          .toList()[controller.selectIndex.value]))),
+                ),
+                SizedBox(
+                  child: SingleChildScrollView(
+                    child: Obx(() => settings[
+                        settings.keys.toList()[controller.selectIndex.value]]!),
+                  ),
+                )
+              ],
             ),
-            Obx(() => settings[settings.keys.toList()[controller.selectIndex.value]]!)
-          ],
-        ),
-      )),
+          )),
     );
   }
 }

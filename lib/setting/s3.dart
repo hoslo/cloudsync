@@ -1,6 +1,7 @@
 import 'package:cloudsync/main.dart';
 import 'package:cloudsync/src/rust/api/config.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class S3Setting extends StatelessWidget {
@@ -10,22 +11,34 @@ class S3Setting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController regionController = TextEditingController();
+    TextEditingController regionController =
+        TextEditingController(text: "auto");
     TextEditingController accessKeyIdController = TextEditingController();
     TextEditingController secretAccessKeyController = TextEditingController();
     TextEditingController bucketController = TextEditingController();
     TextEditingController endpointController = TextEditingController();
+    TextEditingController rootController = TextEditingController(text: "/");
     final controller = Get.find<CloudController>();
     return CupertinoFormSection(
       footer: CupertinoButton(
           child: const Text('Save'),
           onPressed: () async {
+            if (accessKeyIdController.text.isEmpty ||
+                secretAccessKeyController.text.isEmpty ||
+                bucketController.text.isEmpty ||
+                endpointController.text.isEmpty ||
+                regionController.text.isEmpty ||
+                rootController.text.isEmpty) {
+              Get.snackbar("Error", "Please fill all fields");
+              return;
+            }
             await controller.addConfig("S3-1", ServiceType.s3, {
               "access_key_id": accessKeyIdController.text,
               "secret_access_key": secretAccessKeyController.text,
               "bucket": bucketController.text,
               "endpoint": endpointController.text,
               "region": regionController.text,
+              "root": rootController.text
             });
 
             accessKeyIdController.clear();
@@ -39,23 +52,31 @@ class S3Setting extends StatelessWidget {
       children: [
         CupertinoTextFormFieldRow(
           prefix: const Text('access_key_id'),
+          controller: accessKeyIdController,
         ),
         const SizedBox(height: 20),
         CupertinoTextFormFieldRow(
           prefix: const Text('secret_access_key'),
+          controller: secretAccessKeyController,
         ),
         const SizedBox(height: 20),
         CupertinoTextFormFieldRow(
           prefix: const Text('bucket'),
+          controller: bucketController,
         ),
         const SizedBox(height: 20),
         CupertinoTextFormFieldRow(
           prefix: const Text('endpoint'),
+          controller: endpointController,
         ),
         const SizedBox(height: 20),
         CupertinoTextFormFieldRow(
           controller: regionController,
           prefix: const Text('region'),
+        ),
+        CupertinoTextFormFieldRow(
+          controller: rootController,
+          prefix: const Text('root'),
         )
       ],
     );

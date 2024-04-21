@@ -17,6 +17,7 @@ class Cloud extends GetView<CloudController> {
           final configs = state!;
           return ListView.separated(
               itemBuilder: (context, index) {
+                print("config: ${configs[index].config}");
                 return ListTile(
                   onTap: () async {
                     await controller.changeCurrentConfig(configs[index].id);

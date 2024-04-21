@@ -40,6 +40,7 @@ pub(crate) async fn init_cloud_service() -> Result<()> {
 }
 
 pub(crate) async fn change_cloud_service(id: i64) -> Result<()> {
+    info!("111");
     let cs = build_cloud_service(id).await.unwrap();
     match CLOUD_SERVICE.get() {
         Some(cloud_service) => {
@@ -86,7 +87,7 @@ impl CloudService {
     }
 
     pub async fn list(path: String) -> Result<Vec<Entry>> {
-        info!("opendal call");
+        info!("opendal call {}", path);
         if let Some(entries) = get_cloud_service()?.lock().await.entries.get(&path) {
             info!("cache hit");
             return Ok(entries.clone());

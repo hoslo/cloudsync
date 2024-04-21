@@ -11,9 +11,6 @@ import 'package:cloudsync/src/rust/api/data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloudsync/src/rust/frb_generated.dart';
 import 'package:get/get.dart';
-import 'package:get/instance_manager.dart';
-import 'package:get/route_manager.dart';
-import 'package:get/state_manager.dart';
 import "package:path_provider/path_provider.dart";
 
 Future setupLogger() async {
@@ -32,6 +29,7 @@ Future<void> main() async {
     print(details.exception);
   };
   PlatformDispatcher.instance.onError = (error, stack) {
+    print(error);
     return true;
   };
   final dir = await getApplicationDocumentsDirectory();
@@ -93,6 +91,7 @@ class _MyAppState extends State<MyApp> {
           );
         },
         controller: _tabController,
+        resizeToAvoidBottomInset: false,
         tabBar: CupertinoTabBar(
           items: const [
             BottomNavigationBarItem(
