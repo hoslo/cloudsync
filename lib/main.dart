@@ -71,17 +71,16 @@ class _MyAppState extends State<MyApp> {
     Get.lazyPut(() => FileController());
     List<Widget> widgetOptions = <Widget>[
       Cloud(goToFile),
-      const FileView(
-        path: "/",
-      ),
+      const FileView(),
       Setting(goToCloud),
     ];
 
     // final i = ref.watch(currentIndexProvider);
     return GetCupertinoApp(
-      // getPages: [
-      //   GetPage(name: "/files", page: () => const File(),  transition: Transition.cupertino  )
-      // ],
+      debugShowCheckedModeBanner: false,
+      theme: const CupertinoThemeData(
+        scaffoldBackgroundColor: CupertinoColors.systemGroupedBackground,
+      ),
       home: CupertinoTabScaffold(
         tabBuilder: (context, index) {
           return CupertinoTabView(
@@ -115,6 +114,7 @@ class _MyAppState extends State<MyApp> {
 
 class CloudController extends GetxController with StateMixin<List<Config>> {
   var selectIndex = 0.obs;
+  var path = "/".obs;
 
   @override
   void onInit() async {
@@ -152,13 +152,6 @@ class CloudController extends GetxController with StateMixin<List<Config>> {
 }
 
 class FileController extends GetxController with StateMixin<List<Entry>> {
-  var path = "/".obs;
-
-  // @override
-  // void onInit() async {
-  //   super.onInit();
-  //   await listFile();
-  // }
   clearCache() async {
     await CloudService.clearCache();
   }

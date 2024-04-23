@@ -1,7 +1,8 @@
 import 'package:cloudsync/main.dart';
 import 'package:cloudsync/src/rust/api/config.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_cupertino_fields/form_builder_cupertino_fields.dart';
 import 'package:get/get.dart';
 
 class S3Setting extends StatelessWidget {
@@ -19,9 +20,24 @@ class S3Setting extends StatelessWidget {
     TextEditingController endpointController = TextEditingController();
     TextEditingController rootController = TextEditingController(text: "/");
     final controller = Get.find<CloudController>();
-    return CupertinoFormSection(
-      footer: CupertinoButton(
-          child: const Text('Save'),
+    return CupertinoFormSection.insetGrouped(
+      children: [
+        CupertinoTextFormFieldRow(
+            prefix: const Text("Access Key ID"),
+            controller: accessKeyIdController),
+        CupertinoTextFormFieldRow(
+            prefix: const Text("Secret Access Key"),
+            controller: secretAccessKeyController),
+        CupertinoTextFormFieldRow(
+            prefix: const Text("Bucket"), controller: bucketController),
+        CupertinoTextFormFieldRow(
+            prefix: const Text("Endpoint"), controller: endpointController),
+        CupertinoTextFormFieldRow(
+            prefix: const Text("Region"), controller: regionController),
+        CupertinoTextFormFieldRow(
+            prefix: const Text("Root"), controller: rootController),
+        CupertinoButton(
+          child: const Text("Save"),
           onPressed: () async {
             if (accessKeyIdController.text.isEmpty ||
                 secretAccessKeyController.text.isEmpty ||
@@ -48,36 +64,8 @@ class S3Setting extends StatelessWidget {
             regionController.clear();
 
             goToCloud();
-          }),
-      children: [
-        CupertinoTextFormFieldRow(
-          prefix: const Text('access_key_id'),
-          controller: accessKeyIdController,
+          },
         ),
-        const SizedBox(height: 20),
-        CupertinoTextFormFieldRow(
-          prefix: const Text('secret_access_key'),
-          controller: secretAccessKeyController,
-        ),
-        const SizedBox(height: 20),
-        CupertinoTextFormFieldRow(
-          prefix: const Text('bucket'),
-          controller: bucketController,
-        ),
-        const SizedBox(height: 20),
-        CupertinoTextFormFieldRow(
-          prefix: const Text('endpoint'),
-          controller: endpointController,
-        ),
-        const SizedBox(height: 20),
-        CupertinoTextFormFieldRow(
-          controller: regionController,
-          prefix: const Text('region'),
-        ),
-        CupertinoTextFormFieldRow(
-          controller: rootController,
-          prefix: const Text('root'),
-        )
       ],
     );
   }

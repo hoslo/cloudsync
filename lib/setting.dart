@@ -52,6 +52,7 @@ class Setting extends StatelessWidget {
     return SafeArea(
       child: CupertinoPageScaffold(
           resizeToAvoidBottomInset: false,
+          backgroundColor: CupertinoColors.systemGroupedBackground,
           child: Center(
             child: Column(
               children: [
@@ -81,12 +82,12 @@ class Setting extends StatelessWidget {
                       child: Obx(() => Text(settings.keys
                           .toList()[controller.selectIndex.value]))),
                 ),
-                SizedBox(
+                Center(
                   child: SingleChildScrollView(
                     child: Obx(() => settings[
                         settings.keys.toList()[controller.selectIndex.value]]!),
                   ),
-                )
+                ),
               ],
             ),
           )),

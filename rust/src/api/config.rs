@@ -2,12 +2,17 @@ use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};
 
-use super::{cloud_service::change_cloud_service, data::get_db_pool};
+use super::{cloud_service::{build_cloud_service, change_cloud_service, CloudService}, data::get_db_pool};
 
 #[derive(Debug, Clone, sqlx::Type)]
 #[sqlx(type_name = "service_type")]
 pub enum ServiceType {
     S3,
+    Azblob,
+    Azdls,
+    Cos,
+    Oss,
+    Gcs,
 }
 
 #[derive(Debug)]

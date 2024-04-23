@@ -1,48 +1,87 @@
-import 'package:cloudsync/file.dart';
 import 'package:cloudsync/main.dart';
+import 'package:cloudsync/src/rust/api/config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
-class Cloud extends GetView<CloudController> {
-  const Cloud(this.goToCloud, {super.key});
+class Cloud extends StatelessWidget {
+  const Cloud(this.goToFile, {super.key});
 
-  final VoidCallback goToCloud;
+  final VoidCallback goToFile;
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<CloudController>();
     return SafeArea(
       child: Scaffold(
+        backgroundColor: CupertinoColors.systemGroupedBackground,
         body: controller.obx((state) {
           final configs = state!;
-          return ListView.separated(
+          return ListView.builder(
               itemBuilder: (context, index) {
-                print("config: ${configs[index].config}");
-                return ListTile(
-                  onTap: () async {
-                    await controller.changeCurrentConfig(configs[index].id);
-                    goToCloud();
-                    // Navigator.of(context)
-                    //     .push(CupertinoPageRoute(builder: (context) {
-                    //   return FileView(
-                    //     path: "/",
-                    //   );
-                    // }));
-                  },
-                  tileColor:
-                      configs[index].current == 1 ? Colors.blue : Colors.grey,
-                  title: Text(
-                    configs[index].name,
-                    style: const TextStyle(fontSize: 20, color: Colors.black),
+                final config = configs[index];
+                final subTitle =
+                    getServiceTypeSubTitle(serviceType: config.serviceType);
+                return Container(
+                  margin: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0)),
+                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                    margin: const EdgeInsets.fromLTRB(10.0, 6.0, 10.0, 0.0),
+                    child: ListTile(
+                      onTap: () async {
+                        await controller.changeCurrentConfig(configs[index].id);
+                        Get.delete<FileController>();
+                        controller.path.value = "/";
+                        goToFile();
+                      },
+                      leading: Icon(serviceToIcon[configs[index].serviceType]),
+                      tileColor:
+                          config.current == 1 ? Colors.blue : Colors.grey,
+                      title: Text(
+                        config.name,
+                        style:
+                            const TextStyle(fontSize: 20, color: Colors.black),
+                      ),
+                      subtitle: Text(subTitle),
+                      // subtitle: ,
+                    ),
                   ),
                 );
-              },
-              separatorBuilder: (context, index) {
-                return const Divider();
               },
               itemCount: configs.length);
         }, onLoading: const Center(child: CupertinoActivityIndicator())),
       ),
     );
+  }
+}
+
+final serviceToIcon = {
+  ServiceType.s3: FontAwesomeIcons.aws,
+  ServiceType.azblob: FontAwesomeIcons.microsoft,
+  ServiceType.azdls: FontAwesomeIcons.microsoft,
+  ServiceType.cos: FontAwesomeIcons.cloud,
+  ServiceType.oss: FontAwesomeIcons.cloud,
+  ServiceType.gcs: FontAwesomeIcons.google,
+};
+
+String getServiceTypeSubTitle({required ServiceType serviceType}) {
+  switch (serviceType) {
+    case ServiceType.s3:
+      return 'Amazon S3';
+    case ServiceType.azblob:
+      return 'Azure Blob Storage';
+    case ServiceType.azdls:
+      return 'Azure Data Lake Storage Gen2';
+    case ServiceType.cos:
+      return 'Tencent Cloud Object Storage';
+    case ServiceType.oss:
+      return 'Alibaba Cloud Object Storage';
+    case ServiceType.gcs:
+      return 'Google Cloud Storage';
+    default:
+      return '';
   }
 }

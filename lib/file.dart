@@ -8,17 +8,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class FileView extends StatelessWidget {
-  final String path;
-
-  const FileView({super.key, required this.path});
+  const FileView({super.key});
 
   @override
   Widget build(BuildContext context) {
     Get.lazyPut<FileController>(() => FileController());
     final controller = Get.find<FileController>();
-    controller.listFile(path);
+    final cloudController = Get.find<CloudController>();
+    controller.listFile(cloudController.path.value);
     return SafeArea(
         child: Scaffold(
+            backgroundColor: CupertinoColors.systemGroupedBackground,
             floatingActionButton: CupertinoButton(
                 child: const Text("save"),
                 onPressed: () async {
@@ -69,11 +69,10 @@ class FileView extends StatelessWidget {
                           print('tap ${entry.path} ');
 
                           Get.delete<FileController>();
+                          cloudController.path.value = entry.path;
                           Navigator.of(context)
                               .push(CupertinoPageRoute(builder: (context) {
-                            return FileView(
-                              path: entry.path,
-                            );
+                            return FileView();
                           }));
 
                           // Get.to(() => FileView(path: entry.path,),

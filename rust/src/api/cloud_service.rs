@@ -49,22 +49,27 @@ pub(crate) async fn change_cloud_service(id: i64) -> Result<()> {
             cloud_service.config_id = id;
             cloud_service.entries = HashMap::new();
             Ok(())
-        },
+        }
         None => {
-            let r: Result<&Mutex<CloudService>> = CLOUD_SERVICE.get_or_try_init(|| async {
-                Ok(Mutex::new(cs))
-            }).await;
+            let r: Result<&Mutex<CloudService>> = CLOUD_SERVICE
+                .get_or_try_init(|| async { Ok(Mutex::new(cs)) })
+                .await;
             r?;
             Ok(())
-        },
+        }
     }
 }
 
-async fn build_cloud_service(id: i64) -> Result<CloudService> {
+pub(crate) async fn build_cloud_service(id: i64) -> Result<CloudService> {
     let config = Config::get_config(id).await?;
 
     let op = match config.service_type {
         super::config::ServiceType::S3 => CloudService::build_s3(config.config).await,
+        super::config::ServiceType::Azblob => CloudService::build_azblob(config.config).await,
+        super::config::ServiceType::Azdls => CloudService::build_azdls(config.config).await,
+        super::config::ServiceType::Cos => CloudService::build_cos(config.config).await,
+        super::config::ServiceType::Oss => CloudService::build_oss(config.config).await,
+        super::config::ServiceType::Gcs => CloudService::build_gcs(config.config).await,
     };
 
     Ok(CloudService {
@@ -109,5 +114,25 @@ impl CloudService {
             .entries
             .insert(path, list.clone());
         Ok(list)
+    }
+
+    pub async fn read(path: String) -> Result<Vec<u8>> {
+        let bs = get_cloud_service()?.lock().await.op.read(&path).await?;
+        Ok(bs)
+    }
+
+    pub async fn write(path: String, bs: Vec<u8>) -> Result<()> {
+        get_cloud_service()?.lock().await.op.write(&path, bs).await?;
+        Ok(())
+    }
+
+    pub async fn rename(from: String, to: String) -> Result<()> {
+        get_cloud_service()?.lock().await.op.rename(&from, &to).await?;
+        Ok(())
+    }
+
+    pub async fn copy(from: String, to: String) -> Result<()> {
+        get_cloud_service()?.lock().await.op.copy(&from, &to).await?;
+        Ok(())
     }
 }
