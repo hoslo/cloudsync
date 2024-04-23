@@ -29,6 +29,12 @@ class Config {
         hint: hint,
       );
 
+  static Future<void> deleteConfig({required int id, dynamic hint}) =>
+      RustLib.instance.api.configDeleteConfig(
+        id: id,
+        hint: hint,
+      );
+
   static Future<List<Config>> listConfigs({dynamic hint}) =>
       RustLib.instance.api.configListConfigs(
         hint: hint,

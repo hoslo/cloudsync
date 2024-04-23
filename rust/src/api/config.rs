@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};
 
-use super::{cloud_service::{build_cloud_service, change_cloud_service, CloudService}, data::get_db_pool};
+use super::{
+    cloud_service::{build_cloud_service, change_cloud_service, CloudService},
+    data::get_db_pool,
+};
 
 #[derive(Debug, Clone, sqlx::Type)]
 #[sqlx(type_name = "service_type")]
@@ -133,6 +136,14 @@ impl Config {
         .await
         .map_err(|err| anyhow!("Failed to get config, error: {}", err))?;
         Ok((&config).into())
+    }
+
+    pub async fn delete_config(id: i64) -> Result<()> {
+        sqlx::query("DELETE FROM configs WHERE id = $1")
+            .bind(id)
+            .execute(get_db_pool().await?)
+            .await?;
+        Ok(())
     }
 }
 

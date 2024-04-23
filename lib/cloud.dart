@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:pull_down_button/pull_down_button.dart';
 
 class Cloud extends StatelessWidget {
   const Cloud(this.goToFile, {super.key});
@@ -13,6 +14,7 @@ class Cloud extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<CloudController>();
+    final GlobalKey _menuKey = new GlobalKey();
     return SafeArea(
       child: Scaffold(
         backgroundColor: CupertinoColors.systemGroupedBackground,
@@ -46,6 +48,30 @@ class Cloud extends StatelessWidget {
                             const TextStyle(fontSize: 20, color: Colors.black),
                       ),
                       subtitle: Text(subTitle),
+                      trailing: PullDownButton(
+                        buttonBuilder: (context, showMenu) => CupertinoButton(
+                          onPressed: showMenu,
+                          padding: EdgeInsets.zero,
+                          child: const Icon(CupertinoIcons.ellipsis),
+                        ),
+                        itemBuilder: (context) => [
+                          PullDownMenuItem(
+                            title: 'Edit',
+                            onTap: () {},
+                          ),
+                          PullDownMenuItem(
+                            title: 'Delete',
+                            onTap: () async {
+                              if (config.current == 1) {
+                                Get.snackbar(
+                                    "Error", "Cannot delete current config");
+                                return;
+                              }
+                              await controller.deleteConfig(config.id);
+                            },
+                          ),
+                        ],
+                      ),
                       // subtitle: ,
                     ),
                   ),
@@ -56,6 +82,12 @@ class Cloud extends StatelessWidget {
       ),
     );
   }
+}
+
+enum OperationItem {
+  none,
+  edit,
+  delete,
 }
 
 final serviceToIcon = {

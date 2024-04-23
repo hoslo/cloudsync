@@ -11,6 +11,7 @@ import 'package:cloudsync/src/rust/api/data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloudsync/src/rust/frb_generated.dart';
 import 'package:get/get.dart';
+import 'package:get/get_rx/get_rx.dart';
 import "package:path_provider/path_provider.dart";
 
 Future setupLogger() async {
@@ -113,7 +114,8 @@ class _MyAppState extends State<MyApp> {
 }
 
 class CloudController extends GetxController with StateMixin<List<Config>> {
-  var selectIndex = 0.obs;
+  var selectService = "S3".obs;
+  var selectItem = OperationItem.none.obs;
   var path = "/".obs;
 
   @override
@@ -121,10 +123,6 @@ class CloudController extends GetxController with StateMixin<List<Config>> {
     super.onInit();
     var data = await Config.listConfigs();
     change(data, status: RxStatus.success());
-  }
-
-  updateIndex(int index) {
-    selectIndex.value = index;
   }
 
   addConfig(
@@ -137,6 +135,13 @@ class CloudController extends GetxController with StateMixin<List<Config>> {
     change(null, status: RxStatus.loading());
     var data = await Config.listConfigs();
     config.clear();
+    change(data, status: RxStatus.success());
+  }
+
+  deleteConfig(int id) async {
+    await Config.deleteConfig(id: id);
+    change(null, status: RxStatus.loading());
+    var data = await Config.listConfigs();
     change(data, status: RxStatus.success());
   }
 
