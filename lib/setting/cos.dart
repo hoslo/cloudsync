@@ -41,7 +41,7 @@ class CosSetting extends StatelessWidget {
               Get.snackbar("Error", "Please fill all fields");
               return;
             }
-            await controller.addConfig("S3-1", ServiceType.s3, {
+            await controller.createConfig("S3-1", ServiceType.s3, {
               "secret_id": secretIdController.text,
               "secret_key": secretKeyController.text,
               "bucket": bucketController.text,

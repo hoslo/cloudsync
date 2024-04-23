@@ -125,7 +125,7 @@ class CloudController extends GetxController with StateMixin<List<Config>> {
     change(data, status: RxStatus.success());
   }
 
-  addConfig(
+  createConfig(
       String name, ServiceType serviceType, Map<String, String> config) async {
     await Config.newInstance(
       name: name,
@@ -134,12 +134,18 @@ class CloudController extends GetxController with StateMixin<List<Config>> {
     );
     change(null, status: RxStatus.loading());
     var data = await Config.listConfigs();
-    config.clear();
     change(data, status: RxStatus.success());
   }
 
   deleteConfig(int id) async {
     await Config.deleteConfig(id: id);
+    change(null, status: RxStatus.loading());
+    var data = await Config.listConfigs();
+    change(data, status: RxStatus.success());
+  }
+
+  updateConfig(int id, String name, Map<String, String> config) async {
+    await Config.updateConfig(id: id, name: name, config: config);
     change(null, status: RxStatus.loading());
     var data = await Config.listConfigs();
     change(data, status: RxStatus.success());

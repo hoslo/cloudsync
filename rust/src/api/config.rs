@@ -125,7 +125,7 @@ impl Config {
         Ok(r.last_insert_rowid())
     }
 
-    pub(crate) async fn get_config(id: i64) -> Result<Self> {
+    pub async fn get_config(id: i64) -> Result<Self> {
         let config: DatabaseConfig = sqlx::query_as(
             r#"
             SELECT * FROM configs WHERE id = $1
@@ -143,6 +143,19 @@ impl Config {
             .bind(id)
             .execute(get_db_pool().await?)
             .await?;
+        Ok(())
+    }
+
+    pub async fn update_config(id: i64, name: String, config: HashMap<String, String>) -> Result<()> {
+        sqlx::query(
+            r#"
+            UPDATE configs SET config = $2 WHERE id = $1
+        "#,
+        )
+        .bind(id)
+        .bind(sqlx::types::Json(config))
+        .execute(get_db_pool().await?)
+        .await?;
         Ok(())
     }
 }

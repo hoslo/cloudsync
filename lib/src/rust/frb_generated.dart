@@ -87,11 +87,19 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> configDeleteConfig({required int id, dynamic hint});
 
+  Future<Config> configGetConfig({required int id, dynamic hint});
+
   Future<List<Config>> configListConfigs({dynamic hint});
 
   Future<Config> configNew(
       {required String name,
       required ServiceType serviceType,
+      required Map<String, String> config,
+      dynamic hint});
+
+  Future<void> configUpdateConfig(
+      {required int id,
+      required String name,
       required Map<String, String> config,
       dynamic hint});
 
@@ -327,7 +335,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_i_64(id, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 11, port: port_);
+            funcId: 12, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -342,6 +350,31 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kConfigDeleteConfigConstMeta => const TaskConstMeta(
         debugName: "Config_delete_config",
+        argNames: ["id"],
+      );
+
+  @override
+  Future<Config> configGetConfig({required int id, dynamic hint}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_i_64(id, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 11, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_config,
+        decodeErrorData: sse_decode_AnyhowException,
+      ),
+      constMeta: kConfigGetConfigConstMeta,
+      argValues: [id],
+      apiImpl: this,
+      hint: hint,
+    ));
+  }
+
+  TaskConstMeta get kConfigGetConfigConstMeta => const TaskConstMeta(
+        debugName: "Config_get_config",
         argNames: ["id"],
       );
 
@@ -401,13 +434,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> configUpdateConfig(
+      {required int id,
+      required String name,
+      required Map<String, String> config,
+      dynamic hint}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_i_64(id, serializer);
+        sse_encode_String(name, serializer);
+        sse_encode_Map_String_String(config, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 13, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: sse_decode_AnyhowException,
+      ),
+      constMeta: kConfigUpdateConfigConstMeta,
+      argValues: [id, name, config],
+      apiImpl: this,
+      hint: hint,
+    ));
+  }
+
+  TaskConstMeta get kConfigUpdateConfigConstMeta => const TaskConstMeta(
+        debugName: "Config_update_config",
+        argNames: ["id", "name", "config"],
+      );
+
+  @override
   Future<void> newDatabase({required String dbUrl, dynamic hint}) {
     return handler.executeNormal(NormalTask(
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(dbUrl, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 13, port: port_);
+            funcId: 15, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -431,7 +495,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 12, port: port_);
+            funcId: 14, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_log_entry,

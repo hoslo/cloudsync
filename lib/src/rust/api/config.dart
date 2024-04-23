@@ -35,6 +35,12 @@ class Config {
         hint: hint,
       );
 
+  static Future<Config> getConfig({required int id, dynamic hint}) =>
+      RustLib.instance.api.configGetConfig(
+        id: id,
+        hint: hint,
+      );
+
   static Future<List<Config>> listConfigs({dynamic hint}) =>
       RustLib.instance.api.configListConfigs(
         hint: hint,
@@ -49,6 +55,18 @@ class Config {
       RustLib.instance.api.configNew(
         name: name,
         serviceType: serviceType,
+        config: config,
+        hint: hint,
+      );
+
+  static Future<void> updateConfig(
+          {required int id,
+          required String name,
+          required Map<String, String> config,
+          dynamic hint}) =>
+      RustLib.instance.api.configUpdateConfig(
+        id: id,
+        name: name,
         config: config,
         hint: hint,
       );

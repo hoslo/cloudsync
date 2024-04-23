@@ -1,15 +1,11 @@
-import 'dart:ffi';
+import 'dart:developer';
 
 import 'package:cloudsync/main.dart';
 import 'package:cloudsync/setting/cos.dart';
 import 'package:cloudsync/setting/s3.dart';
 import 'package:cloudsync/src/rust/api/config.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 class Setting extends StatelessWidget {
@@ -74,14 +70,43 @@ class Setting extends StatelessWidget {
                     ),
                   ),
                   Center(
-                 
-                      child: Obx(() => settings[controller.selectService.value]!),
-                    
+                    child: Obx(() => settings[controller.selectService.value]!),
                   ),
                 ],
               ),
             ),
           )),
     );
+  }
+}
+
+class EditSetting extends StatelessWidget {
+  final int configId;
+  final ServiceType serviceType;
+
+  const EditSetting(
+      {super.key, required this.configId, required this.serviceType});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+        child: CupertinoPageScaffold(
+            resizeToAvoidBottomInset: false,
+            backgroundColor: CupertinoColors.systemGroupedBackground,
+            child: SingleChildScrollView(child: Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 20),
+                child: Builder(builder: (context) {
+                  switch (serviceType) {
+                    case ServiceType.s3:
+                      return S3Setting(
+                        id: configId,
+                      );
+                    default:
+                      return const S3Setting();
+                  }
+                }),
+              ),
+            ))));
   }
 }

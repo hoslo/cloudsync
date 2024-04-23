@@ -349,6 +349,39 @@ fn wire_Config_delete_config_impl(
         },
     )
 }
+fn wire_Config_get_config_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "Config_get_config",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_id = <i64>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse(
+                    (move || async move { crate::api::config::Config::get_config(api_id).await })()
+                        .await,
+                )
+            }
+        },
+    )
+}
 fn wire_Config_list_configs_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -412,6 +445,45 @@ fn wire_Config_new_impl(
                 transform_result_sse(
                     (move || async move {
                         crate::api::config::Config::new(api_name, api_service_type, api_config)
+                            .await
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire_Config_update_config_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "Config_update_config",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_id = <i64>::sse_decode(&mut deserializer);
+            let api_name = <String>::sse_decode(&mut deserializer);
+            let api_config =
+                <std::collections::HashMap<String, String>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse(
+                    (move || async move {
+                        crate::api::config::Config::update_config(api_id, api_name, api_config)
                             .await
                     })()
                     .await,
@@ -790,11 +862,13 @@ fn pde_ffi_dispatcher_primary_impl(
         5 => wire_CloudService_write_impl(port, ptr, rust_vec_len, data_len),
         1 => wire_init_app_impl(port, ptr, rust_vec_len, data_len),
         9 => wire_Config_change_current_config_impl(port, ptr, rust_vec_len, data_len),
-        11 => wire_Config_delete_config_impl(port, ptr, rust_vec_len, data_len),
+        12 => wire_Config_delete_config_impl(port, ptr, rust_vec_len, data_len),
+        11 => wire_Config_get_config_impl(port, ptr, rust_vec_len, data_len),
         10 => wire_Config_list_configs_impl(port, ptr, rust_vec_len, data_len),
         8 => wire_Config_new_impl(port, ptr, rust_vec_len, data_len),
-        13 => wire_new_database_impl(port, ptr, rust_vec_len, data_len),
-        12 => wire_setup_log_stream_impl(port, ptr, rust_vec_len, data_len),
+        13 => wire_Config_update_config_impl(port, ptr, rust_vec_len, data_len),
+        15 => wire_new_database_impl(port, ptr, rust_vec_len, data_len),
+        14 => wire_setup_log_stream_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }

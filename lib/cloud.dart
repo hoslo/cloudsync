@@ -1,4 +1,5 @@
 import 'package:cloudsync/main.dart';
+import 'package:cloudsync/setting.dart';
 import 'package:cloudsync/src/rust/api/config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,6 @@ class Cloud extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<CloudController>();
-    final GlobalKey _menuKey = new GlobalKey();
     return SafeArea(
       child: Scaffold(
         backgroundColor: CupertinoColors.systemGroupedBackground,
@@ -52,12 +52,23 @@ class Cloud extends StatelessWidget {
                         buttonBuilder: (context, showMenu) => CupertinoButton(
                           onPressed: showMenu,
                           padding: EdgeInsets.zero,
-                          child: const Icon(CupertinoIcons.ellipsis),
+                          child: const Icon(
+                            CupertinoIcons.ellipsis,
+                            color: CupertinoColors.black,
+                          ),
                         ),
                         itemBuilder: (context) => [
                           PullDownMenuItem(
                             title: 'Edit',
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.of(context)
+                                  .push(CupertinoPageRoute(builder: (context) {
+                                return EditSetting(
+                                  configId: config.id,
+                                  serviceType: config.serviceType,
+                                );
+                              }));
+                            },
                           ),
                           PullDownMenuItem(
                             title: 'Delete',
