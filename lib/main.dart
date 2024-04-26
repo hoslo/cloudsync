@@ -17,7 +17,7 @@ import "package:path_provider/path_provider.dart";
 Future setupLogger() async {
   setupLogStream().listen((msg) {
     // This should use a logging framework in real applications
-    print("${msg.logLevel} ${msg.lbl.padRight(8)}: ${msg.msg}");
+    print("${msg.logLevel} ${msg.lbl}: ${msg.msg}");
   });
 }
 
@@ -49,32 +49,20 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // var _currentIndex = 1;
-
-  final CupertinoTabController _tabController =
-      CupertinoTabController(initialIndex: 0);
-
-  void goToCloud() {
-    setState(() {
-      _tabController.index = 0;
-    });
-  }
-
-  void goToFile() {
-    setState(() {
-      _tabController.index = 1;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     Get.lazyPut(() => CloudController());
     Get.lazyPut(() => FileController());
+    Get.lazyPut(() => MainController());
+    final keyList = List.generate(3, (index) {
+      return GlobalKey<NavigatorState>();
+    });
     List<Widget> widgetOptions = <Widget>[
-      Cloud(goToFile),
+      Cloud(navigateKey: keyList[1]),
       const FileView(),
-      Setting(goToCloud),
+      const Setting(),
     ];
+    final tabController = Get.find<MainController>();
 
     // final i = ref.watch(currentIndexProvider);
     return GetCupertinoApp(
@@ -82,33 +70,34 @@ class _MyAppState extends State<MyApp> {
       theme: const CupertinoThemeData(
         scaffoldBackgroundColor: CupertinoColors.systemGroupedBackground,
       ),
-      home: CupertinoTabScaffold(
-        tabBuilder: (context, index) {
-          return CupertinoTabView(
-            builder: (context) {
-              return widgetOptions[index];
+      home: Obx(() => CupertinoTabScaffold(
+            tabBuilder: (context, index) {
+              return CupertinoTabView(
+                navigatorKey: keyList[index],
+                builder: (context) {
+                  return widgetOptions[index];
+                },
+              );
             },
-          );
-        },
-        controller: _tabController,
-        resizeToAvoidBottomInset: false,
-        tabBar: CupertinoTabBar(
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.folder),
-              label: 'Clouds',
+            controller: tabController.currentIndex.value,
+            resizeToAvoidBottomInset: false,
+            tabBar: CupertinoTabBar(
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.folder),
+                  label: 'Clouds',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.cloud),
+                  label: 'Files',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.settings),
+                  label: 'Settings',
+                ),
+              ],
             ),
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.cloud),
-              label: 'Files',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.settings),
-              label: 'Settings',
-            ),
-          ],
-        ),
-      ),
+          )),
     );
   }
 }
@@ -117,6 +106,7 @@ class CloudController extends GetxController with StateMixin<List<Config>> {
   var selectService = "S3".obs;
   var selectItem = OperationItem.none.obs;
   var path = "/".obs;
+  var emptyRoute = false.obs;
 
   @override
   void onInit() async {
@@ -144,8 +134,13 @@ class CloudController extends GetxController with StateMixin<List<Config>> {
     change(data, status: RxStatus.success());
   }
 
-  updateConfig(int id, String name, Map<String, String> config) async {
+  updateConfig(
+      int id, String name, int current, Map<String, String> config) async {
     await Config.updateConfig(id: id, name: name, config: config);
+    if (current == 1) {
+      Get.delete<FileController>();
+      path.value = "/";
+    }
     change(null, status: RxStatus.loading());
     var data = await Config.listConfigs();
     change(data, status: RxStatus.success());
@@ -156,9 +151,6 @@ class CloudController extends GetxController with StateMixin<List<Config>> {
     await Config.changeCurrentConfig(id: id);
     var data = await Config.listConfigs();
     change(data, status: RxStatus.success());
-    final fileController = Get.find<FileController>();
-    fileController.listFile("/");
-    fileController.change(null, status: RxStatus.loading());
   }
 }
 
@@ -178,6 +170,10 @@ class FileController extends GetxController with StateMixin<List<Entry>> {
       change(null, status: RxStatus.error(getErrorDetail(e)));
     }
   }
+}
+
+class MainController extends GetxController {
+  var currentIndex = CupertinoTabController(initialIndex: 1).obs;
 }
 
 String getErrorDetail(Object error) {

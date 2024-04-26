@@ -1,8 +1,9 @@
+import 'dart:io';
+
 import 'package:cloudsync/main.dart';
-import 'package:cloudsync/src/rust/api/config.dart';
-import 'package:file_icon/file_icon.dart';
+import 'package:cloudsync/src/rust/api/cloud_service.dart';
+import 'package:cloudsync/widgets/listile.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:filesize/filesize.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,74 +13,56 @@ class FileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cloudController = Get.find<CloudController>();
     Get.lazyPut<FileController>(() => FileController());
     final controller = Get.find<FileController>();
-    final cloudController = Get.find<CloudController>();
     controller.listFile(cloudController.path.value);
     return SafeArea(
-        child: Scaffold(
+        child: CupertinoPageScaffold(
             backgroundColor: CupertinoColors.systemGroupedBackground,
-            floatingActionButton: CupertinoButton(
-                child: const Text("save"),
-                onPressed: () async {
-                  // controller.clearCache();
-                  // Get.delete<FileController>();
-                  // Navigator.of(context).pushAndRemoveUntil(
-                  //     CupertinoPageRoute(builder: (context) {
-                  //   return const FileView(
-                  //     path: "/",
-                  //   );
-                  // }), (Route<dynamic> route) => false);
-                  String? outputFile = await FilePicker.platform.saveFile(
-                    dialogTitle: 'Please select an output file:',
-                    fileName: 'output-file.pdf',
-                  );
-
-                  if (outputFile == null) {
-                    // User canceled the picker
-                  }
-                  print('output file $outputFile');
-                  return;
-                }),
-            body: controller.obx(
+            child: controller.obx(
               (state) {
                 final entries = state!;
                 return ListView.separated(
                     itemBuilder: (_, index) {
                       final entry = entries[index];
-                      final size = filesize(entry.contentLength);
-                      return CupertinoListTile(
-                        leading: entry.mode == EntryMode.file
-                            ? FileIcon(
-                                entry.path,
-                                // size: c.entries[index].contentLength as double,
-                              )
-                            : const Icon(Icons.folder),
-                        title: Text(
-                          entry.path.length > 40
-                              ? '${entry.path.substring(0, 9)}...${entry.path.substring(entry.path.length - 10)}'
-                              : entry.path,
-                          maxLines: 1,
-                        ),
-                        // textColor: CupertinoColors.black,
-                        subtitle: Text(size),
-                        // style: ListTileStyle.list,
-                        // tileColor: CupertinoColors.systemBackground,
-                        onTap: () async {
-                          print('tap ${entry.path} ');
-
-                          Get.delete<FileController>();
-                          cloudController.path.value = entry.path;
-                          Navigator.of(context)
-                              .push(CupertinoPageRoute(builder: (context) {
-                            return FileView();
-                          }));
-
-                          // Get.to(() => FileView(path: entry.path,),
-                          //     arguments:  entry.path,
-                          //     preventDuplicates: false);
-                          // print('route name ${ModalRoute.of(context)}');
+                      return CupertinoContextMenu(
+                        // ignore: deprecated_member_use
+                        previewBuilder: (BuildContext context,
+                            Animation<double> animation, Widget child) {
+                          return SingleChildScrollView(
+                            child: EntryTile(entry: entry),
+                          );
                         },
+                        actions: [
+                          CupertinoContextMenuAction(
+                            onPressed: () async {
+                              String? outputFile =
+                                  await FilePicker.platform.saveFile(
+                                dialogTitle: 'Please select an output file:',
+                                fileName: 'output-file.pdf',
+                              );
+
+                              if (outputFile == null) {
+                                // User canceled the picker
+                                Get.snackbar(
+                                    "Error", "No output file selected");
+                                return;
+                              }
+                              // download file to outputFile
+                              final bs =
+                                  await CloudService.read(path: entry.path);
+                              print('downloading file to $outputFile, length: ${bs.length}');
+                              await File(outputFile).writeAsBytes(bs);
+                            },
+                            isDefaultAction: true,
+                            trailingIcon: CupertinoIcons.cloud_download,
+                            child: const Text('Download'),
+                          ),
+                        ],
+                        child: SingleChildScrollView(
+                          child: EntryTile(entry: entry),
+                        ),
                       );
                     },
                     separatorBuilder: (_, index) {

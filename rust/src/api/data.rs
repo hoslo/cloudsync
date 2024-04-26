@@ -1,4 +1,4 @@
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 use log::{info, LevelFilter};
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
 use tokio::sync::OnceCell;

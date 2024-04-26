@@ -9,9 +9,8 @@ import 'package:get/get.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 class Setting extends StatelessWidget {
-  const Setting(this.goToCloud, {super.key});
+  const Setting({super.key});
 
-  final VoidCallback goToCloud;
 
   get onPressed => null;
   @override
@@ -20,11 +19,9 @@ class Setting extends StatelessWidget {
 
     final settings = {
       "S3": S3Setting(
-        goToCloud: goToCloud,
+        
       ),
-      "COS": CosSetting(
-        goToCloud: goToCloud,
-      ),
+     
     };
 
     return SafeArea(

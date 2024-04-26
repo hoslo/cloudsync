@@ -2,10 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};
 
-use super::{
-    cloud_service::{build_cloud_service, change_cloud_service, CloudService},
-    data::get_db_pool,
-};
+use super::{cloud_service::change_cloud_service, data::get_db_pool};
 
 #[derive(Debug, Clone, sqlx::Type)]
 #[sqlx(type_name = "service_type")]
@@ -68,9 +65,9 @@ impl Config {
     ) -> Result<Self> {
         let mut config = Config {
             id: 0,
-            name: name,
-            service_type: service_type,
-            config: config,
+            name,
+            service_type,
+            config,
             current: 0,
         };
         config.id = config.create_config().await?;
@@ -146,14 +143,19 @@ impl Config {
         Ok(())
     }
 
-    pub async fn update_config(id: i64, name: String, config: HashMap<String, String>) -> Result<()> {
+    pub async fn update_config(
+        id: i64,
+        name: String,
+        config: HashMap<String, String>,
+    ) -> Result<()> {
         sqlx::query(
             r#"
-            UPDATE configs SET config = $2 WHERE id = $1
+            UPDATE configs SET name = $1, config = $2 WHERE id = $3
         "#,
         )
-        .bind(id)
+        .bind(name)
         .bind(sqlx::types::Json(config))
+        .bind(id)
         .execute(get_db_pool().await?)
         .await?;
         Ok(())

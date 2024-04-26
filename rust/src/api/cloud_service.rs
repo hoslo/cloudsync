@@ -29,7 +29,7 @@ pub(crate) async fn init_cloud_service() -> Result<()> {
         Some(config) => {
             let r: Result<&Mutex<CloudService>> = CLOUD_SERVICE
                 .get_or_try_init(|| async {
-                    return Ok(Mutex::new(build_cloud_service(config.id).await?));
+                    Ok(Mutex::new(build_cloud_service(config.id).await?))
                 })
                 .await;
             r?;
@@ -73,7 +73,7 @@ pub(crate) async fn build_cloud_service(id: i64) -> Result<CloudService> {
     };
 
     Ok(CloudService {
-        op: op,
+        op,
         config_id: id,
         entries: HashMap::new(),
     })
@@ -122,17 +122,32 @@ impl CloudService {
     }
 
     pub async fn write(path: String, bs: Vec<u8>) -> Result<()> {
-        get_cloud_service()?.lock().await.op.write(&path, bs).await?;
+        get_cloud_service()?
+            .lock()
+            .await
+            .op
+            .write(&path, bs)
+            .await?;
         Ok(())
     }
 
     pub async fn rename(from: String, to: String) -> Result<()> {
-        get_cloud_service()?.lock().await.op.rename(&from, &to).await?;
+        get_cloud_service()?
+            .lock()
+            .await
+            .op
+            .rename(&from, &to)
+            .await?;
         Ok(())
     }
 
     pub async fn copy(from: String, to: String) -> Result<()> {
-        get_cloud_service()?.lock().await.op.copy(&from, &to).await?;
+        get_cloud_service()?
+            .lock()
+            .await
+            .op
+            .copy(&from, &to)
+            .await?;
         Ok(())
     }
 }

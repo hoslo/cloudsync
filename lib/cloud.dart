@@ -1,3 +1,4 @@
+import 'package:cloudsync/file.dart';
 import 'package:cloudsync/main.dart';
 import 'package:cloudsync/setting.dart';
 import 'package:cloudsync/src/rust/api/config.dart';
@@ -8,9 +9,22 @@ import 'package:get/get.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 class Cloud extends StatelessWidget {
-  const Cloud(this.goToFile, {super.key});
+  const Cloud({super.key, required this.navigateKey});
 
-  final VoidCallback goToFile;
+  final GlobalKey<NavigatorState> navigateKey;
+
+  selectService(int id) async {
+    final controller = Get.find<CloudController>();
+    final mainController = Get.find<MainController>();
+    await controller.changeCurrentConfig(id);
+    Get.delete<FileController>();
+    controller.path.value = "/";
+    mainController.currentIndex.value.index = 1;
+    navigateKey.currentState!.pushAndRemoveUntil(
+        CupertinoPageRoute(builder: (context) {
+      return const FileView();
+    }), (route) => false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,10 +48,7 @@ class Cloud extends StatelessWidget {
                     margin: const EdgeInsets.fromLTRB(10.0, 6.0, 10.0, 0.0),
                     child: ListTile(
                       onTap: () async {
-                        await controller.changeCurrentConfig(configs[index].id);
-                        Get.delete<FileController>();
-                        controller.path.value = "/";
-                        goToFile();
+                        await selectService(config.id);
                       },
                       leading: Icon(serviceToIcon[configs[index].serviceType]),
                       tileColor:
@@ -58,6 +69,12 @@ class Cloud extends StatelessWidget {
                           ),
                         ),
                         itemBuilder: (context) => [
+                          PullDownMenuItem(
+                            title: 'Select',
+                            onTap: () async {
+                              await selectService(config.id);
+                            },
+                          ),
                           PullDownMenuItem(
                             title: 'Edit',
                             onTap: () {

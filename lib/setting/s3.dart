@@ -6,11 +6,9 @@ import 'package:get/get.dart';
 class S3Setting extends StatelessWidget {
   const S3Setting({
     super.key,
-    this.goToCloud,
     this.id,
   });
 
-  final VoidCallback? goToCloud;
   final int? id;
 
   Future<bool> createConfig(
@@ -45,6 +43,7 @@ class S3Setting extends StatelessWidget {
   }
 
   Future<bool> updateConfig(
+    int current,
     String name,
     String accessKeyId,
     String secretAccessKey,
@@ -64,7 +63,7 @@ class S3Setting extends StatelessWidget {
       return false;
     }
     final controller = Get.find<CloudController>();
-    await controller.updateConfig(id!, name, {
+    await controller.updateConfig(id!, name, current, {
       "access_key_id": accessKeyId,
       "secret_access_key": secretAccessKey,
       "bucket": bucket,
@@ -85,6 +84,7 @@ class S3Setting extends StatelessWidget {
     TextEditingController bucketController = TextEditingController();
     TextEditingController endpointController = TextEditingController();
     TextEditingController rootController = TextEditingController(text: "/");
+    var current = 0;
     if (id != null) {
       Config.getConfig(id: id!).then((value) => {
             nameController.text = value.name,
@@ -93,7 +93,8 @@ class S3Setting extends StatelessWidget {
             bucketController.text = value.config["bucket"]!,
             endpointController.text = value.config["endpoint"]!,
             regionController.text = value.config["region"]!,
-            rootController.text = value.config["root"]!
+            rootController.text = value.config["root"]!,
+            current = value.current
           });
     }
 
@@ -119,8 +120,9 @@ class S3Setting extends StatelessWidget {
           child: const Text("Save"),
           onPressed: () async {
             var result = false;
-            if (goToCloud == null) {
+            if (id != null) {
               result = await updateConfig(
+                current,
                 nameController.text,
                 accessKeyIdController.text,
                 secretAccessKeyController.text,
@@ -151,8 +153,9 @@ class S3Setting extends StatelessWidget {
             } else {
               return;
             }
-            if (goToCloud != null) {
-              goToCloud!();
+            if (id == null) {
+              final tabController = Get.find<MainController>();
+              tabController.currentIndex.value.index = 0;
             } else {
               // ignore: use_build_context_synchronously
               Navigator.pop(context);
