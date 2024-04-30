@@ -118,6 +118,7 @@ impl CloudService {
 
     pub async fn read(path: String) -> Result<Vec<u8>> {
         let bs = get_cloud_service()?.lock().await.op.read(&path).await?;
+        info!("read {} bytes", bs.len());
         Ok(bs)
     }
 

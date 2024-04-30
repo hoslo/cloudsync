@@ -7,6 +7,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+String getEntrgetyName(Entry entry) {
+  final paths = entry.path.split('/');
+  if (entry.mode == EntryMode.file) {
+    return paths.last;
+  }
+  return paths[paths.length - 2];
+}
+
 class EntryTile extends StatelessWidget {
   const EntryTile({super.key, required this.entry});
 
@@ -16,6 +24,8 @@ class EntryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = filesize(entry.contentLength);
     final cloudController = Get.find<CloudController>();
+    final name = getEntrgetyName(entry);
+    print('orgin path ${entry.path}, name $name');
     return CupertinoListTile(
       leading: entry.mode == EntryMode.file
           ? FileIcon(
@@ -23,19 +33,23 @@ class EntryTile extends StatelessWidget {
               // size: c.entries[index].contentLength as double,
             )
           : const Icon(Icons.folder),
-      title: Text(
-        entry.path.length > 40
-            ? '${entry.path.substring(0, 9)}...${entry.path.substring(entry.path.length - 10)}'
-            : entry.path,
-        maxLines: 1,
+      title: LayoutBuilder(
+        builder: (context, constraints) {
+          return SizedBox(
+            width: constraints.maxWidth - 50,
+            child: Text(
+              name,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          );
+        },
       ),
       subtitle: Text(size),
       onTap: () async {
         if (entry.mode == EntryMode.file) {
           return;
         }
-        print('tap ${entry.path} ');
-
         Get.delete<FileController>();
         cloudController.path.value = entry.path;
         Navigator.of(context).push(CupertinoPageRoute(builder: (context) {
